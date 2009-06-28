@@ -14,16 +14,19 @@ except:
     sys.exit(1)
 
 
+# Quick and dirty fix to display numbers in treeview str columns
+# TODO: refactor treeview to have float columns
 def jpaste(number, digits=3):
     """Utility function to write a floating point number to text"""
     return "%1.3f" % float(number)
 
+# Regular expressions to validate user input in delta and alpha fields
 valid_alpha = re.compile(r'^[ \t]*0*\.[0-9]+[ \t]*$')
 valid_delta = re.compile(r'^[ \t]*[0-9]*\.[0-9]+[ \t]*$')
 
 
 class JruleGTK:
-    """Graphical user interface for the SQP compare function using 
+    """Graphical user interface for the MplusOutput class using 
        GTK+ and Glade."""
 
     def __init__(self):
@@ -64,10 +67,12 @@ class JruleGTK:
         self.window.show()
 
     def jpaste(self, number):
-        """Utility function to write a floating point number to text"""
+        """Utility function to write a floating point number to text.
+           Currently not yet in use."""
         return eval("\%1." + self.digits + "f") % float(number)
 
     def set_file(self, filechooser):
+        """Given the user's choice of file, save this data and reload the list."""
         self.filename = filechooser.get_filename()
         sys.stderr.write("File chosen is %s.\n" % self.filename)
         self.update_status()
@@ -77,6 +82,8 @@ class JruleGTK:
                 ' Please make sure you have selected the right file.')
     
     def reload(self, *args):
+        """Reload the list using the MplusOutput class. Might be used as a callback
+           so has variable number of arguments."""
         try:
             self.output = MplusOutput(self.filename)
             self.estimates = self.output.get_estimates()
@@ -90,6 +97,7 @@ class JruleGTK:
         return True
 
     def update_status(self, context_id=0):
+        """Displays a text in the status bar showing the file currently in use."""
         if self.filename:
             msg = "The current output file is '%s'. Click to select the items."\
                  % self.filename
@@ -104,10 +112,10 @@ class JruleGTK:
 
     def about_response(self, aboutbox, signal):
         sys.stderr.write("Received signal %d from about box\n" % signal)
-        if signal < 0:
-            aboutbox.hide()
+        if signal < 0: aboutbox.hide()
 
     def get_delta(self):
+        "Check user input and return chosen delta value"
         error = ''
         value = self.delta_entry.get_text()
         sys.stderr.write('Getting delta, value is %s.\n'%value)
@@ -125,6 +133,7 @@ class JruleGTK:
             return float(value)
 
     def get_alpha(self):
+        "Check user input and return chosen alpha value"
         error = ''
         value = self.alpha_entry.get_text()
         sys.stderr.write('Getting alpha, value is %s.\n'%value)
@@ -147,6 +156,7 @@ class JruleGTK:
 
 class TreeView:
     """Class representing the list of parameters."""
+
     def __init__(self, application):
         sys.stderr.write("Initialising the item list (gtk.TreeView)\n")
         self.treeview = application.tree.get_widget("treeview")
@@ -172,6 +182,7 @@ class TreeView:
             column_id += 1 # default arguments are static!
         
     def reload(self, visible_func=None):
+        """Initialize or reload the treeview given a filter function"""
         self.treemodelfilter = self.treestore.filter_new(root=None)
         if visible_func:
             self.treemodelfilter.set_visible_func(visible_func, data=None)
@@ -193,6 +204,7 @@ class TreeView:
                         jpaste(values[-1]), jpaste(values[-2])) )
     
     def filter(self, by, filter_text):
+        """Filters the parameter list by regular expression for one of the fields"""
         sys.stderr.write('Filtering.. by=%s; text=%s\n'%(by,filter_text))
         def visible_func(model, iter, user_data):
             if not filter_text: return True #Don't even bother
@@ -200,11 +212,12 @@ class TreeView:
             sys.stderr.write("The value is "+model.get_value(iter, colnum)+"\n")
             found = re.search(filter_text, str(model.get_value(iter, colnum)),
                     re.IGNORECASE)
-            return found and True or False
+            return found and True or False  # strange: does not work w/o True/F
                    
         self.reload(visible_func)
 
 class ComboBox:
+    """A class for the three combobox filters."""
     def __init__(self, widget_name, app, choices=()):
         self.app = app
         self.widget_name = widget_name
@@ -219,18 +232,24 @@ class ComboBox:
         self.widget.add_attribute(cell, 'text' ,0)
         self.widget.set_active(0)   
 
-        self.widget.connect('changed', self.filter_parameters)
+        self.widget.connect('changed', self.changed)
 
-    def set_text(self, widget):
-        model = widget.get_model()
-        index = widget.get_active()
-        widget.child.set_text(model[index][0])
-
-    def filter_parameters(self, widget):
+    def changed(self, widget):
+        "Callback for change of combo menu or typing text"
+        self.set_text(widget)  # change text based on menu selection
         self.app.treeview.filter(by = self.filters_by, 
             filter_text = widget.child.get_text())
 
+    def set_text(self, widget):
+        "Set the text of the ComboEntry to the combo menu selection"
+        model = widget.get_model()
+        index = widget.get_active()
+        if index:
+            widget.child.set_text(model[index][0])
+
+
 class Messager:
+    "Convenience class to display error and info dialogs"
     def __init__(self, app):
         self.dialog = app.tree.get_widget('messagedialog')
 
