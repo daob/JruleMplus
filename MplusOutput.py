@@ -183,6 +183,7 @@ class MplusOutput:
           class_num_string = re.compile('^Group ([A-Z_-]+)[ ]*[\r\n]')
       else:
           class_num_string = re.compile('^CLASS (\d+)[ ]*[\r\n]')
+      class_num = 1
       statements = dict()
 
       for line in self.f:
@@ -205,7 +206,7 @@ class MplusOutput:
                values = list(float(v) for v in values )
                
                if (values[0] != 999.0 and abs(values[3]) > 0.0001):
-                  ncp = ( values[0] / values[3]**2 ) * delta**2
+                  ncp = ( values[0] / values[1]**2 ) * delta**2
                   values.append(ncp)
                   if scipy_ok: # calculate power
                      values.append(1 - float(ncx2.cdf(critical, 1.0, values[4])))
