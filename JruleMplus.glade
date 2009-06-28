@@ -254,7 +254,9 @@
                             <property name="has_tooltip">True</property>
                             <property name="tooltip" translatable="yes">Enter a part of the parameter name to view only parameters with a name that matches your filter.
 
-You can also use regular expressions. (If you don't know what that means, try http://www.amk.ca/python/howto/regex/).</property>
+You can also use regular expressions. For example "BY|WITH" (BY or WITH parameters) or "BY (?!Y1)" (all loadings except those on Y1).
+
+(For more tricks try http://www.amk.ca/python/howto/regex/).</property>
                             <signal name="changed" handler="on_combo_parameter_changed"/>
                           </widget>
                           <packing>
@@ -282,7 +284,8 @@ You can also use regular expressions. (If you don't know what that means, try ht
                             <property name="visible">True</property>
                             <property name="tooltip" translatable="yes">Enter (a part of) the group name to view only parameters from a group that matches your filter.
 
-You can also use regular expressions. (If you don't know what that means, try http://www.amk.ca/python/howto/regex/).</property>
+You can also use regular expressions.  For example: "DENMARK|SWITZERLAND", or even "DEN|SW".
+(For more information try http://www.amk.ca/python/howto/regex/).</property>
                             <signal name="changed" handler="on_combo_group_changed"/>
                           </widget>
                           <packing>

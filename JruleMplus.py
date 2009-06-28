@@ -203,7 +203,6 @@ class TreeView:
                     parameter = Parameter(parameter_name, group, values, 
                         self.application)
                     parameter.append_to_tree(self.treestore)
-        #TODO: calculate judgement rules
     
     def filter(self, by, filter_text):
         """Filters the parameter list by regular expression for one of the fields"""
@@ -282,6 +281,8 @@ class Parameter:
     def get_decision(self):
         "Decide whether the parameter is misspecified or not"
         #TODO: allow choice of high power in UI
+        #TODO: allow choice of bonferroni correction to alpha 
+        #       (none, simple or complex)
         return self.mi > 3.84 and 'Reject' or 'Accept'
 
 
