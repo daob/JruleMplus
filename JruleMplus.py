@@ -202,6 +202,7 @@ class TreeView:
                     self.treestore.append( None, (parameter, '-', str(group),
                         jpaste(values[0]), jpaste(values[1]), 
                         jpaste(values[-1]), jpaste(values[-2])) )
+        #TODO: calculate judgement rules
     
     def filter(self, by, filter_text):
         """Filters the parameter list by regular expression for one of the fields"""
