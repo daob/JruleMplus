@@ -3,6 +3,8 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy project-wide -->
   <widget class="GtkWindow" id="main_window">
+    <property name="width_request">600</property>
+    <property name="height_request">500</property>
     <property name="title" translatable="yes">Jrule for Mplus beta</property>
     <property name="window_position">center</property>
     <property name="default_width">600</property>
@@ -179,6 +181,7 @@
                     <child>
                       <widget class="GtkFileChooserButton" id="filechooser">
                         <property name="visible">True</property>
+                        <property name="tooltip" translatable="yes">Click to open an Mplus Output file.</property>
                         <signal name="file_set" handler="on_filechooser_file_set"/>
                       </widget>
                       <packing>
@@ -248,6 +251,10 @@
                         <child>
                           <widget class="GtkComboBoxEntry" id="combo_parameter">
                             <property name="visible">True</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip" translatable="yes">Enter a part of the parameter name to view only parameters with a name that matches your filter.
+
+You can also use regular expressions. (If you don't know what that means, try http://www.amk.ca/python/howto/regex/).</property>
                             <signal name="changed" handler="on_combo_parameter_changed"/>
                           </widget>
                           <packing>
@@ -258,6 +265,9 @@
                         <child>
                           <widget class="GtkComboBoxEntry" id="combo_decision">
                             <property name="visible">True</property>
+                            <property name="tooltip" translatable="yes">Enter a part of the decision rule name to view only parameters with a decision that matches your filter.
+
+You can also use regular expressions. (If you don't know what that means, try http://www.amk.ca/python/howto/regex/).</property>
                             <signal name="changed" handler="on_combo_decision_changed"/>
                           </widget>
                           <packing>
@@ -270,6 +280,9 @@
                         <child>
                           <widget class="GtkComboBoxEntry" id="combo_group">
                             <property name="visible">True</property>
+                            <property name="tooltip" translatable="yes">Enter (a part of) the group name to view only parameters from a group that matches your filter.
+
+You can also use regular expressions. (If you don't know what that means, try http://www.amk.ca/python/howto/regex/).</property>
                             <signal name="changed" handler="on_combo_group_changed"/>
                           </widget>
                           <packing>
@@ -295,6 +308,9 @@
                           <widget class="GtkTreeView" id="treeview">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip" translatable="yes">Possible misspecifications in the model.
+
+Click on a column to sort the misspecifications by that column.</property>
                             <property name="reorderable">True</property>
                             <property name="enable_grid_lines">horizontal</property>
                           </widget>
@@ -309,6 +325,8 @@
                 <child>
                   <widget class="GtkLabel" id="label2">
                     <property name="visible">True</property>
+                    <property name="tooltip" translatable="yes">Overview of the possible misspecifications for which Modification Indices (MI's) and Expected parameter Changes (EPC's) were obtained.
+</property>
                     <property name="label" translatable="yes">Parameters and misspecifications</property>
                   </widget>
                   <packing>
@@ -327,6 +345,9 @@
                         <property name="can_focus">True</property>
                         <property name="can_default">True</property>
                         <property name="has_default">True</property>
+                        <property name="tooltip" translatable="yes">The delta value indicates what the smallest misspecification is you consider to be important in your model. 
+
+Please note that this value is *unstandardized*.</property>
                         <property name="invisible_char">&#x25CF;</property>
                         <property name="text" translatable="yes">0.10</property>
                         <property name="xalign">1</property>
@@ -354,7 +375,7 @@
                       <widget class="GtkLabel" id="label_delta1">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">With type II error (alpha) rate of:</property>
+                        <property name="label" translatable="yes">With type I error (alpha) rate of:</property>
                       </widget>
                       <packing>
                         <property name="top_attach">1</property>
@@ -368,6 +389,7 @@
                         <property name="can_focus">True</property>
                         <property name="can_default">True</property>
                         <property name="has_default">True</property>
+                        <property name="tooltip" translatable="yes">Alpha is the type-I error rate of the score test. The score test is the  modification index (MI) test: The MI has a chi-square with 1 df distribution.</property>
                         <property name="invisible_char">&#x25CF;</property>
                         <property name="text" translatable="yes">0.05</property>
                         <property name="xalign">1</property>
@@ -399,6 +421,7 @@
                 <child>
                   <widget class="GtkLabel" id="label4">
                     <property name="visible">True</property>
+                    <property name="tooltip" translatable="yes">Change the effect size you wish to detect, set the risk of type I error, define what you consider to be 'high power'.</property>
                     <property name="label" translatable="yes">Change decision rules</property>
                   </widget>
                   <packing>

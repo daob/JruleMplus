@@ -13,7 +13,6 @@ try:
 except:
     sys.exit(1)
 
-
 # Quick and dirty fix to display numbers in treeview str columns
 # TODO: refactor treeview to have float columns
 def jpaste(number, digits=3):
@@ -30,7 +29,7 @@ class JruleGTK:
        GTK+ and Glade."""
 
     def __init__(self):
-        self.filename = '' # The file to be read
+        self.filename = 'tests/MTMM_ROUND_1.OUT' # The file to be read
 
         #Set the Glade file
         self.gladefile = "JruleMplus.glade"  
@@ -65,6 +64,8 @@ class JruleGTK:
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
+        self.reload() # fill the tree if there is a file
+       
 
     def jpaste(self, number):
         """Utility function to write a floating point number to text.
@@ -197,11 +198,11 @@ class TreeView:
             mi_dict = self.application.output.get_modindices(\
                         self.application.get_delta(), 
                         self.application.get_alpha() )
-            for parameter, result in mi_dict.iteritems():
+            for parameter_name, result in mi_dict.iteritems():
                 for group, values in result.iteritems():
-                    self.treestore.append( None, (parameter, '-', str(group),
-                        jpaste(values[0]), jpaste(values[1]), 
-                        jpaste(values[-1]), jpaste(values[-2])) )
+                    parameter = Parameter(parameter_name, group, values, 
+                        self.application)
+                    parameter.append_to_tree(self.treestore)
         #TODO: calculate judgement rules
     
     def filter(self, by, filter_text):
@@ -210,7 +211,6 @@ class TreeView:
         def visible_func(model, iter, user_data):
             if not filter_text: return True #Don't even bother
             colnum = [name.lower() for name in self.column_names].index(by.lower())
-            sys.stderr.write("The value is "+model.get_value(iter, colnum)+"\n")
             found = re.search(filter_text, str(model.get_value(iter, colnum)),
                     re.IGNORECASE)
             return found and True or False  # strange: does not work w/o True/F
@@ -237,17 +237,13 @@ class ComboBox:
 
     def changed(self, widget):
         "Callback for change of combo menu or typing text"
-        self.set_text(widget)  # change text based on menu selection
+        #TODO: self.set_text(widget)  # change text based on menu selection
         self.app.treeview.filter(by = self.filters_by, 
             filter_text = widget.child.get_text())
 
     def set_text(self, widget):
         "Set the text of the ComboEntry to the combo menu selection"
-        model = widget.get_model()
-        index = widget.get_active()
-        if index:
-            widget.child.set_text(model[index][0])
-
+        raise NotImplementedError # There should be a HowDoesThisWork error
 
 class Messager:
     "Convenience class to display error and info dialogs"
@@ -258,6 +254,36 @@ class Messager:
         self.dialog.set_markup(message)
         response = self.dialog.run()
         self.dialog.hide()
+
+class Parameter:
+    """Class to hold information about the possibly misspecified parameter
+       and provide logic to calculate deltas and decisions. Subclass to get
+       different kinds of parameters (WITH, BY, etc.)"""
+
+    def __init__(self, name, group, values, app):
+        # TODO: Recode 999.0 to missing
+        self.name = name
+        self.group = group
+        self.mi = values[0]
+        self.epc = values[1]
+        self.std_epc = values[3]
+        self.power = values[-1]
+        self.ncp = values[-2]
+        self.app = app
+    
+    def append_to_tree(self, treestore):
+        """Show this parameter in a TreeStore"""
+        # TODO: Give a different bg-color to different decisions
+        # TODO: Give a different color to text describing groups
+        treestore.append( None, (self.name, self.get_decision(), str(self.group),
+            jpaste(self.mi), jpaste(self.epc), 
+            jpaste(self.power), jpaste(self.ncp)) )
+
+    def get_decision(self):
+        "Decide whether the parameter is misspecified or not"
+        #TODO: allow choice of high power in UI
+        return self.mi > 3.84 and 'Reject' or 'Accept'
+
 
 if __name__ == "__main__":
     app = JruleGTK()

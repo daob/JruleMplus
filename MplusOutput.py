@@ -205,7 +205,8 @@ class MplusOutput:
                values = about_variable[0][1:]
                values = list(float(v) for v in values )
                
-               if (values[0] != 999.0 and abs(values[3]) > 0.0001):
+               if (values[0] != 999.0 and abs(values[3]) > 0.0001 and \
+                    abs(values[1])> 1e-6):
                   ncp = ( values[0] / values[1]**2 ) * delta**2
                   values.append(ncp)
                   if scipy_ok: # calculate power
