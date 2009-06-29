@@ -340,8 +340,9 @@ Click on a column to sort the misspecifications by that column.</property>
                 <child>
                   <widget class="GtkTable" id="table2">
                     <property name="visible">True</property>
-                    <property name="n_rows">2</property>
+                    <property name="n_rows">3</property>
                     <property name="n_columns">2</property>
+                    <property name="homogeneous">True</property>
                     <child>
                       <widget class="GtkEntry" id="delta_entry">
                         <property name="visible">True</property>
@@ -407,6 +408,41 @@ Please note that this value is *unstandardized*.</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
+                    <child>
+                      <widget class="GtkLabel" id="label_delta2">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">'High power' is any probability above:</property>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="power_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="can_default">True</property>
+                        <property name="has_default">True</property>
+                        <property name="tooltip" translatable="yes">The power of the Modification Index test is the probability of rejecting the null hypothesis of no misspecification given that it is false.
+
+This field sets the criterion for "high power"; that is, when the detection probability is considered to be "high".</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">0.80</property>
+                        <property name="xalign">1</property>
+                        <property name="caps_lock_warning">False</property>
+                        <signal name="focus_out_event" handler="on_power_entry_focus_out_event"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -463,14 +499,16 @@ Please note that this value is *unstandardized*.</property>
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
     <property name="program_name">Jrule for Mplus</property>
-    <property name="version">alpha</property>
+    <property name="version">beta</property>
+    <property name="website">http://wiki.github.com/daob/JruleMplus</property>
     <property name="authors">daniel oberski
 
 Based on a paper (2009) by
 
-Willem E. Saris
-Albert Satorra
-William van der Veld</property>
+    Willem E. Saris
+    Albert Satorra
+    William van der Veld</property>
+    <property name="documenters">daniel oberski</property>
     <property name="logo">img/decision.png</property>
     <signal name="response" handler="on_about_response"/>
     <child internal-child="vbox">

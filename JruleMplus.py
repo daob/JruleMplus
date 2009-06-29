@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+# vim: set fileencoding=utf-8 :
 
 import sys, os, re
+from scipy.stats.distributions import chi2 # chi-square distribution
 try:
     import pygtk
     pygtk.require("2.0")
@@ -21,7 +23,9 @@ def jpaste(number, digits=3):
 
 # Regular expressions to validate user input in delta and alpha fields
 valid_alpha = re.compile(r'^[ \t]*0*\.[0-9]+[ \t]*$')
+valid_power = valid_alpha
 valid_delta = re.compile(r'^[ \t]*[0-9]*\.[0-9]+[ \t]*$')
+
 
 
 class JruleGTK:
@@ -30,6 +34,7 @@ class JruleGTK:
 
     def __init__(self):
         self.filename = 'tests/MTMM_ROUND_1.OUT' # The file to be read
+        self.critical = False
 
         #Set the Glade file
         self.gladefile = "JruleMplus.glade"  
@@ -41,6 +46,7 @@ class JruleGTK:
         self.statusbar = self.tree.get_widget("statusbar")
         self.filechooser = self.tree.get_widget("filechooser")
         self.alpha_entry = self.tree.get_widget("alpha_entry")
+        self.power_entry = self.tree.get_widget("power_entry")
         self.delta_entry = self.tree.get_widget("delta_entry")
         self.treeview = TreeView(self)# see ItemList class below
         self.messager = Messager(self)
@@ -50,6 +56,14 @@ class JruleGTK:
             'Check EPC', 'Not enough information'])
         
         self.update_status() # show current file in status bar
+
+        self.treecolors = {'Inconclusive': '#dee3e3',
+            'Misspecified': '#e38f8f',
+            'Not misspecified': '#6be05f',
+            'Misspecified (EPC > δ)': '#e3b3b3',
+            'Not misspecified (EPC ≤ δ)' : '#a8e8a1',
+        } # default colors to give the background of the treeview
+        self.use_colors = True # Whether to color bg of treeview
         
         # connect widget signals to class functions
         self.window.connect("destroy", gtk.main_quit)
@@ -61,11 +75,11 @@ class JruleGTK:
                 "on_about_response" : self.about_response,
                 "on_delta_entry_changed" : self.reload,
                 "on_alpha_entry_changed" : self.reload,
+                "on_power_entry_changed" : self.reload,
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
         self.reload() # fill the tree if there is a file
-       
 
     def jpaste(self, number):
         """Utility function to write a floating point number to text.
@@ -100,7 +114,7 @@ class JruleGTK:
     def update_status(self, context_id=0):
         """Displays a text in the status bar showing the file currently in use."""
         if self.filename:
-            msg = "The current output file is '%s'. Click to select the items."\
+            msg = "The current output file is '%s'."\
                  % self.filename
         else:
             msg = "Please click the file selection button on the left to"+\
@@ -115,42 +129,34 @@ class JruleGTK:
         sys.stderr.write("Received signal %d from about box\n" % signal)
         if signal < 0: aboutbox.hide()
 
-    def get_delta(self):
-        "Check user input and return chosen delta value"
+
+    def get_field_value(self, which):
+        which_dict = {'alpha': (self.alpha_entry, valid_alpha),
+            'power': (self.power_entry, valid_power),
+            'delta': (self.delta_entry, valid_delta),
+        }
+        if which not in which_dict.keys(): return 0.0
+  
         error = ''
-        value = self.delta_entry.get_text()
-        sys.stderr.write('Getting delta, value is %s.\n'%value)
+        value = which_dict[which][0].get_text()
         try:
             float(value)
         except ValueError, e:
             error = str(e)
-        if not valid_delta.match(value):
+        if not which_dict[which][1].match(value):
             error = 'Value does not match validation criteria.'
         if error:
             self.error('Please enter a valid number (separated by a dot) '+\
-                    'in the <b>delta</b> field.\n\nThe error is "%s"'%error)
+                    'in the <b>%s</b> field.\n\nThe error is "%s"'%\
+                    (which, error))
             return 0.0
         else:
             return float(value)
 
-    def get_alpha(self):
-        "Check user input and return chosen alpha value"
-        error = ''
-        value = self.alpha_entry.get_text()
-        sys.stderr.write('Getting alpha, value is %s.\n'%value)
-        try:
-            float(value)
-        except ValueError, e:
-            error = str(e)
-        if not valid_alpha.match(value):
-            error = 'Value does not match validation criteria.'
-        if error:
-            self.error('Please enter a valid number (separated by a dot) '+\
-                    'in the <b>alpha</b> field.\n\nThe error is "%s"'%error)
-            return 0.0
-        else:
-            return float(value)
-    
+    def get_critical(self):
+        if self.critical: return self.critical
+        else: self.critical = chi2.ppf(1.0 - self.get_field_value('alpha'), 1)
+
     def error(self, err_string):
         self.messager.display_message(err_string)
 
@@ -163,9 +169,9 @@ class TreeView:
         self.treeview = application.tree.get_widget("treeview")
         self.application = application
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
-        self.treestore = gtk.TreeStore(str,str,str,str,str,str,str)
-        self.column_names = ('Parameter',  'Decision', 'Group',
-                            'MI', 'EPC', 'Power', 'NCP')
+        self.treestore = gtk.TreeStore(str,str,str,str,str,str,str,str)
+        self.column_names = ('Parameter',  'Decision',  
+                            'Group', 'MI', 'EPC', 'Power', 'NCP')
         self.append_columns(self.column_names)
         self.reload()
 
@@ -179,6 +185,12 @@ class TreeView:
             col.pack_start(cell, True)
             col.set_sort_column_id(column_id)
             col.add_attribute(cell, 'text', column_id)
+            
+            if title is 'Decision':
+                cell.set_property('foreground-set', True)
+                cell.set_property('background-set', True)
+                col.set_attributes(cell, background=7, text=1)
+
             self.treeview.append_column(col)
             column_id += 1 # default arguments are static!
         
@@ -196,8 +208,8 @@ class TreeView:
         self.treestore.clear()
         if self.application.output:
             mi_dict = self.application.output.get_modindices(\
-                        self.application.get_delta(), 
-                        self.application.get_alpha() )
+                        self.application.get_field_value('delta'), 
+                        self.application.get_field_value('alpha') )
             for parameter_name, result in mi_dict.iteritems():
                 for group, values in result.iteritems():
                     parameter = Parameter(parameter_name, group, values, 
@@ -276,14 +288,29 @@ class Parameter:
         # TODO: Give a different color to text describing groups
         treestore.append( None, (self.name, self.get_decision(), str(self.group),
             jpaste(self.mi), jpaste(self.epc), 
-            jpaste(self.power), jpaste(self.ncp)) )
+            jpaste(self.power), jpaste(self.ncp), 
+            self.app.treecolors[self.get_decision()]) )
 
     def get_decision(self):
         "Decide whether the parameter is misspecified or not"
-        #TODO: allow choice of high power in UI
         #TODO: allow choice of bonferroni correction to alpha 
         #       (none, simple or complex)
-        return self.mi > 3.84 and 'Reject' or 'Accept'
+        significant = self.mi > self.app.get_critical()
+        high_power = self.power > self.app.get_field_value('power')
+        
+        if significant and not high_power:
+            decision = 'Misspecified'
+        elif not significant and not high_power:
+            decision = 'Inconclusive'
+        elif not significant and high_power:
+            decision = 'Not misspecified'
+        elif significant and high_power:
+            if self.epc > self.app.get_field_value('delta'):
+                decision = 'Misspecified (EPC > δ)'
+            else:
+                decision = 'Not misspecified (EPC ≤ δ)'
+
+        return decision
 
 
 if __name__ == "__main__":
