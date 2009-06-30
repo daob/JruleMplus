@@ -3,6 +3,16 @@
 
 import sys, os, re
 from scipy.stats.distributions import chi2 # chi-square distribution
+
+
+import matplotlib   
+matplotlib.use('GTK')   
+from matplotlib.figure import Figure   
+from matplotlib.axes import Subplot   
+from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
+from matplotlib.numerix import arange, sin, pi   
+  
+
 try:
     import pygtk
     pygtk.require("2.0")
@@ -79,6 +89,7 @@ class JruleGTK:
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
+        self.plot = JPlot(self)
         self.reload() # fill the tree if there is a file
 
     def jpaste(self, number):
@@ -109,6 +120,7 @@ class JruleGTK:
             return False
         # If all went well, put the items found into the treeview
         self.treeview.populate_tree()
+        self.plot.reload()
         return True
 
     def update_status(self, context_id=0):
@@ -159,6 +171,26 @@ class JruleGTK:
 
     def error(self, err_string):
         self.messager.display_message(err_string)
+
+
+class JPlot:
+    def __init__(self, app):
+        #setup matplotlib stuff on first notebook page (empty graph)
+        self.app = app
+        self.figure = Figure(figsize=(6,4), dpi=72)
+        self.axis = self.figure.add_subplot(111)
+        self.axis.set_xlabel('Modification index')
+        self.axis.set_ylabel('Power')
+        self.axis.set_title('Misspecifications')
+        self.axis.grid(True)
+        self.canvas = FigureCanvasGTK(self.figure)
+        self.canvas.show()
+        self.graphview = self.app.tree.get_widget("vbox_plot")
+        self.graphview.pack_start(self.canvas, True, True)
+
+    def reload(self):
+        self.graphview.remove(self.canvas)
+        self.__init__(self.app)
 
 
 class TreeView:

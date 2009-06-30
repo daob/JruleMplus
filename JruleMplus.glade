@@ -338,6 +338,35 @@ Click on a column to sort the misspecifications by that column.</property>
                   </packing>
                 </child>
                 <child>
+                  <widget class="GtkVBox" id="vbox_plot">
+                    <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Plots</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                    <property name="tab_fill">False</property>
+                    <property name="type">tab</property>
+                  </packing>
+                </child>
+                <child>
                   <widget class="GtkTable" id="table2">
                     <property name="visible">True</property>
                     <property name="n_rows">3</property>
@@ -450,7 +479,7 @@ This field sets the criterion for "high power"; that is, when the detection prob
                     </child>
                   </widget>
                   <packing>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -469,7 +498,7 @@ This field sets the criterion for "high power"; that is, when the detection prob
                     <property name="label" translatable="yes">Change decision rules</property>
                   </widget>
                   <packing>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                     <property name="tab_fill">False</property>
                     <property name="type">tab</property>
                   </packing>
