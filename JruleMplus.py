@@ -6,11 +6,12 @@ from scipy.stats.distributions import chi2 # chi-square distribution
 
 
 import matplotlib   
-matplotlib.use('GTK')   
+matplotlib.use('GTK')
+matplotlib.interactive(1)
 from matplotlib.figure import Figure   
 from matplotlib.axes import Subplot   
+from matplotlib.lines import Line2D
 from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
-from matplotlib.numerix import arange, sin, pi   
   
 
 try:
@@ -43,7 +44,7 @@ class JruleGTK:
        GTK+ and Glade."""
 
     def __init__(self):
-        self.filename = 'tests/MTMM_ROUND_1.OUT' # The file to be read
+        self.filename = '' #'tests/MTMM_ROUND_1.OUT' # The file to be read
         self.critical = False
 
         #Set the Glade file
@@ -89,8 +90,9 @@ class JruleGTK:
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
-        self.plot = JPlot(self)
+        self.plot = None
         self.reload() # fill the tree if there is a file
+        self.plot = JPlot(self)
 
     def jpaste(self, number):
         """Utility function to write a floating point number to text.
@@ -110,6 +112,7 @@ class JruleGTK:
     def reload(self, *args):
         """Reload the list using the MplusOutput class. Might be used as a callback
            so has variable number of arguments."""
+        self.critical = False #recalc
         try:
             self.output = MplusOutput(self.filename)
             self.estimates = self.output.get_estimates()
@@ -120,7 +123,7 @@ class JruleGTK:
             return False
         # If all went well, put the items found into the treeview
         self.treeview.populate_tree()
-        self.plot.reload()
+        if self.plot: self.plot.reload()
         return True
 
     def update_status(self, context_id=0):
@@ -174,19 +177,49 @@ class JruleGTK:
 
 
 class JPlot:
+    """Misspecification plot"""
     def __init__(self, app):
         #setup matplotlib stuff on first notebook page (empty graph)
         self.app = app
+        # Plot defaults:
+        self.imp_col = '#dd2244'
+        self.nim_col = '#5533dd'
+        # Create figure
         self.figure = Figure(figsize=(6,4), dpi=72)
         self.axis = self.figure.add_subplot(111)
         self.axis.set_xlabel('Modification index')
         self.axis.set_ylabel('Power')
         self.axis.set_title('Misspecifications')
-        self.axis.grid(True)
+        # omit missing observations
+        parameters = [par for par in self.app.parameters if \
+                        par.mi <99.0 and par.power < 1.0 and par.epc < 99.0]
+        mis = [par.mi for par in parameters]
+        names = [par.name for par in parameters]
+        powers = [par.power for par in parameters]
+
+        self.axis.scatter( mis, powers,
+            c = [par.epc > self.app.get_field_value('delta') \
+                and self.imp_col or self.nim_col for par in parameters],
+            alpha = 0.8, linewidth=0, picker=5.0
+        )
+        self.axis.autoscale_view(True) #tight
+
+        self.axis.axvline(self.app.get_critical(),
+             color='#444444', linestyle='dashed')
+        self.axis.axhline( y=float(self.app.get_field_value('power')),
+             color='#444444', linestyle='dashed')
+
         self.canvas = FigureCanvasGTK(self.figure)
+        self.canvas.mpl_connect('pick_event', self.pick_handler)
         self.canvas.show()
         self.graphview = self.app.tree.get_widget("vbox_plot")
         self.graphview.pack_start(self.canvas, True, True)
+
+    def pick_handler(self, event):
+        mouseevent = event.mouseevent
+        artist = event.artist
+        sys.stderr.write('mousover %s\n'%str(artist))
+       # nw do something with this...
 
     def reload(self):
         self.graphview.remove(self.canvas)
@@ -242,10 +275,12 @@ class TreeView:
             mi_dict = self.application.output.get_modindices(\
                         self.application.get_field_value('delta'), 
                         self.application.get_field_value('alpha') )
+            self.application.parameters = []
             for parameter_name, result in mi_dict.iteritems():
                 for group, values in result.iteritems():
                     parameter = Parameter(parameter_name, group, values, 
                         self.application)
+                    self.application.parameters.append(parameter)
                     parameter.append_to_tree(self.treestore)
     
     def filter(self, by, filter_text):

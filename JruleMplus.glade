@@ -211,6 +211,7 @@
               <widget class="GtkNotebook" id="notebook1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="change_current_page" handler="on_notebook1_change_current_page"/>
                 <child>
                   <widget class="GtkVBox" id="vbox4">
                     <property name="visible">True</property>
@@ -356,9 +357,9 @@ Click on a column to sort the misspecifications by that column.</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkLabel" id="label3">
+                  <widget class="GtkLabel" id="plot_tab">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Plots</property>
+                    <property name="label" translatable="yes">Misspecification plots</property>
                   </widget>
                   <packing>
                     <property name="position">1</property>
@@ -492,10 +493,11 @@ This field sets the criterion for "high power"; that is, when the detection prob
                   <placeholder/>
                 </child>
                 <child>
-                  <widget class="GtkLabel" id="label4">
+                  <widget class="GtkLabel" id="tab_rules">
                     <property name="visible">True</property>
                     <property name="tooltip" translatable="yes">Change the effect size you wish to detect, set the risk of type I error, define what you consider to be 'high power'.</property>
                     <property name="label" translatable="yes">Change decision rules</property>
+                    <signal name="focus_out_event" handler="on_tab_rules_focus_out_event"/>
                   </widget>
                   <packing>
                     <property name="position">3</property>
