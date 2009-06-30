@@ -161,9 +161,9 @@ class JruleGTK:
         if not which_dict[which][1].match(value):
             error = 'Value does not match validation criteria.'
         if error:
-            self.error('Please enter a valid number (separated by a dot) '+\
-                    'in the <b>%s</b> field.\n\nThe error is "%s"'%\
-                    (which, error))
+#            self.error('Please enter a valid number (separated by a dot) '+\
+#                    'in the <b>%s</b> field.\n\nThe error is "%s"'%\
+#                    (which, error))
             return 0.0
         else:
             return float(value)
@@ -190,25 +190,27 @@ class JPlot:
         self.axis.set_xlabel('Modification index')
         self.axis.set_ylabel('Power')
         self.axis.set_title('Misspecifications')
-        # omit missing observations
-        parameters = [par for par in self.app.parameters if \
+        try:
+            # omit missing observations
+            parameters = [par for par in self.app.parameters if \
                         par.mi <99.0 and par.power < 1.0 and par.epc < 99.0]
-        mis = [par.mi for par in parameters]
-        names = [par.name for par in parameters]
-        powers = [par.power for par in parameters]
+            mis = [par.mi for par in parameters]
+            names = [par.name for par in parameters]
+            powers = [par.power for par in parameters]
 
-        self.axis.scatter( mis, powers,
-            c = [par.epc > self.app.get_field_value('delta') \
-                and self.imp_col or self.nim_col for par in parameters],
-            alpha = 0.8, linewidth=0, picker=5.0
-        )
-        self.axis.autoscale_view(True) #tight
+            self.axis.scatter( mis, powers,
+                c = [par.epc > self.app.get_field_value('delta') \
+                    and self.imp_col or self.nim_col for par in parameters],
+                alpha = 0.8, linewidth=0, picker=5.0
+            )
+            self.axis.autoscale_view(True) #tight
 
-        self.axis.axvline(self.app.get_critical(),
-             color='#444444', linestyle='dashed')
-        self.axis.axhline( y=float(self.app.get_field_value('power')),
-             color='#444444', linestyle='dashed')
-
+            self.axis.axvline(self.app.get_critical(),
+                 color='#444444', linestyle='dashed')
+            self.axis.axhline( y=float(self.app.get_field_value('power')),
+                 color='#444444', linestyle='dashed')
+        except AttributeError:
+            pass
         self.canvas = FigureCanvasGTK(self.figure)
         self.canvas.mpl_connect('pick_event', self.pick_handler)
         self.canvas.show()
