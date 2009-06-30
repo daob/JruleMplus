@@ -285,14 +285,13 @@ class TreeView:
                     self.application.parameters.append(parameter)
                     parameter.append_to_tree(self.treestore)
     
-    def filter(self, by, filter_text):
+    def filter(self, by, filter_text, filter_re):
         """Filters the parameter list by regular expression for one of the fields"""
         sys.stderr.write('Filtering.. by=%s; text=%s\n'%(by,filter_text))
         def visible_func(model, iter, user_data):
             if not filter_text: return True #Don't even bother
             colnum = [name.lower() for name in self.column_names].index(by.lower())
-            found = re.search(filter_text, str(model.get_value(iter, colnum)),
-                    re.IGNORECASE)
+            found = filter_re.search(str(model.get_value(iter, colnum)))
             return found and True or False  # strange: does not work w/o True/F
                    
         self.reload(visible_func)
@@ -318,8 +317,13 @@ class ComboBox:
     def changed(self, widget):
         "Callback for change of combo menu or typing text"
         #TODO: self.set_text(widget)  # change text based on menu selection
+        text = widget.child.get_text()
+        try:
+           filter_re = re.compile(text, re.IGNORECASE)
+        except: 
+            return
         self.app.treeview.filter(by = self.filters_by, 
-            filter_text = widget.child.get_text())
+            filter_text = text, filter_re = filter_re)
 
     def set_text(self, widget):
         "Set the text of the ComboEntry to the combo menu selection"
