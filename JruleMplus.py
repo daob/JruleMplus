@@ -71,8 +71,8 @@ class JruleGTK:
         self.treecolors = {'Inconclusive': '#dee3e3',
             'Misspecified': '#e38f8f',
             'Not misspecified': '#6be05f',
-            'Misspecified (EPC > δ)': '#e3b3b3',
-            'Not misspecified (EPC ≤ δ)' : '#a8e8a1',
+            'Misspecified (EPC > Î´)': '#e3b3b3',
+            'Not misspecified (EPC â¤ Î´)' : '#a8e8a1',
         } # default colors to give the background of the treeview
         self.use_colors = True # Whether to color bg of treeview
         
@@ -201,7 +201,8 @@ class JPlot:
             self.axis.scatter( mis, powers,
                 c = [par.epc > self.app.get_field_value('delta') \
                     and self.imp_col or self.nim_col for par in parameters],
-                alpha = 0.8, linewidth=0, picker=5.0
+                alpha = 0.8, linewidth=0, picker=5.0, vmin=self.imp_col,
+		vmax = self.nim_col
             )
             self.axis.autoscale_view(True) #tight
 
@@ -379,9 +380,9 @@ class Parameter:
             decision = 'Not misspecified'
         elif significant and high_power:
             if self.epc > self.app.get_field_value('delta'):
-                decision = 'Misspecified (EPC > δ)'
+                decision = 'Misspecified (EPC > Î´)'
             else:
-                decision = 'Not misspecified (EPC ≤ δ)'
+                decision = 'Not misspecified (EPC â¤ Î´)'
 
         return decision
 
