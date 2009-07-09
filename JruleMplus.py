@@ -71,8 +71,8 @@ class JruleGTK:
         self.treecolors = {'Inconclusive': '#dee3e3',
             'Misspecified': '#e38f8f',
             'Not misspecified': '#6be05f',
-            'Misspecified (EPC > Î´)': '#e3b3b3',
-            'Not misspecified (EPC â¤ Î´)' : '#a8e8a1',
+            'Misspecified (EPC > Δ)': '#e3b3b3',
+            'Not misspecified (EPC ≤ Δ)' : '#a8e8a1',
         } # default colors to give the background of the treeview
         self.use_colors = True # Whether to color bg of treeview
         
@@ -285,7 +285,7 @@ class TreeView:
                         self.application)
                     self.application.parameters.append(parameter)
                     parameter.append_to_tree(self.treestore)
-    
+
     def filter(self, by, filter_text, filter_re):
         """Filters the parameter list by regular expression for one of the fields"""
         sys.stderr.write('Filtering.. by=%s; text=%s\n'%(by,filter_text))
@@ -294,7 +294,7 @@ class TreeView:
             colnum = [name.lower() for name in self.column_names].index(by.lower())
             found = filter_re.search(str(model.get_value(iter, colnum)))
             return found and True or False  # strange: does not work w/o True/F
-                   
+
         self.reload(visible_func)
 
 class ComboBox:
@@ -388,5 +388,8 @@ class Parameter:
 
 
 if __name__ == "__main__":
+    try: sys.stderr = file('logfile.txt', 'w')
+    except: pass
     app = JruleGTK()
     gtk.main()
+    sys.stderr.close()

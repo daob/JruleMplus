@@ -13,7 +13,7 @@ AllowUNCPath=false
 VersionInfoVersion=0.9
 VersionInfoCompany=daniel oberski daob
 VersionInfoDescription=JRuleMplus
-
+LicenseFile = license.txt
 
 [Dirs]
 Name: {app}; Flags: uninsalwaysuninstall;
