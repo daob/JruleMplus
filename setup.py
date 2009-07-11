@@ -11,11 +11,12 @@ data_files = ['JruleMplus.glade',
 
 mpl_data = matplotlib.get_py2exe_datafiles()
 data_files.extend(mpl_data)
+data_files.append('boost_python-vc90-mt-gd-1_39.dll')
 
 setup(
     name = 'JruleMplus',
     description = 'Judgement Rule Aid for Mplus',
-    version = 'alpha',
+    version = 'beta',
 
     windows = [
                   {
@@ -27,9 +28,10 @@ setup(
     options = {
                   'py2exe': {
                       'packages':'encodings',
-                      'includes': 'cairo, pango, pangocairo, atk, gobject, matplotlib.figure, matplotlib.axes, matplotlib.lines, matplotlib.backends.backend_gtk, scipy.stats.distributions, matplotlib.numerix.random_array',
+                      'includes': 'cairo, pango, pangocairo, atk, gobject, \
+			matplotlib.backends.backend_gtk, distributions',
 		      'excludes': [ '_tkagg'],
-		      "dll_excludes": ["MSVCR90D.dll"],
+		      "dll_excludes": [ "MSVCR90D.dll","MSVCR90P.dll","MSVCP90D.dll"],
 		
                   }
               },

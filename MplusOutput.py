@@ -169,7 +169,7 @@ class MplusOutput:
       self.stopping_string = re.compile('^TECHNICAL \d OUTPUT')
 
       in_block       = False
-      critical = distributions.qchisq(1, 1.0-alpha) # critical value for alpha level
+      critical = distributions.qchisq(1, alpha) # critical value for alpha level
       
       statement_string = re.compile('^[\[]*([\w ]+\w+)[ \]]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)')
       if multigroup:
@@ -202,7 +202,7 @@ class MplusOutput:
                     abs(values[1])> 1e-6):
                   ncp = ( values[0] / values[1]**2 ) * delta**2
                   values.append(ncp)
-                  values.append(1 - float(distributions.pchisq(1, critical, values[4])))
+                  values.append(distributions.pchisq(1, ncp, critical))
                else:
                   values.extend([999.0,999.0]) # missing values
 
