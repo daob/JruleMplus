@@ -2,8 +2,7 @@
 # vim: set fileencoding=utf-8 :
 
 import sys, os, re
-from scipy.stats.distributions import chi2 # chi-square distribution
-
+import distributions
 
 import matplotlib   
 matplotlib.use('GTK')
@@ -71,8 +70,8 @@ class JruleGTK:
         self.treecolors = {'Inconclusive': '#dee3e3',
             'Misspecified': '#e38f8f',
             'Not misspecified': '#6be05f',
-            'Misspecified (EPC > Δ)': '#e3b3b3',
-            'Not misspecified (EPC ≤ Δ)' : '#a8e8a1',
+            'Misspecified (EPC > Î)': '#e3b3b3',
+            'Not misspecified (EPC â¤ Î)' : '#a8e8a1',
         } # default colors to give the background of the treeview
         self.use_colors = True # Whether to color bg of treeview
         
@@ -170,7 +169,7 @@ class JruleGTK:
 
     def get_critical(self):
         if self.critical: return self.critical
-        else: self.critical = chi2.ppf(1.0 - self.get_field_value('alpha'), 1)
+        else: self.critical = distributions.qchisq(1, 1.0 - self.get_field_value('alpha'))
 
     def error(self, err_string):
         self.messager.display_message(err_string)
@@ -380,9 +379,9 @@ class Parameter:
             decision = 'Not misspecified'
         elif significant and high_power:
             if self.epc > self.app.get_field_value('delta'):
-                decision = 'Misspecified (EPC > Î´)'
+                decision = 'Misspecified (EPC > ÃÂ´)'
             else:
-                decision = 'Not misspecified (EPC â¤ Î´)'
+                decision = 'Not misspecified (EPC Ã¢ÂÂ¤ ÃÂ´)'
 
         return decision
 

@@ -1,4 +1,5 @@
 import re
+import distributions # noncentral chisquare from Boost::math
 
 
 class MplusOutput:
@@ -168,15 +169,7 @@ class MplusOutput:
       self.stopping_string = re.compile('^TECHNICAL \d OUTPUT')
 
       in_block       = False
-      scipy_ok       = True
-      try:
-         from scipy.stats.distributions import chi2 # chi-square distribution
-         from scipy.stats.distributions import ncx2 # non-central chi-square
-      except ImportError:
-         scipy_ok = False
-         print "\nWarning: You do not have the scipy library installed. "
-         print "The power cannot be calculated.\n"
-      if scipy_ok: critical = chi2.ppf(1.0-alpha, 1) # critical value for alpha level
+      critical = distributions.qchisq(1, 1.0-alpha) # critical value for alpha level
       
       statement_string = re.compile('^[\[]*([\w ]+\w+)[ \]]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)[ ]+([-]*\d+\.\d+)')
       if multigroup:
@@ -209,10 +202,7 @@ class MplusOutput:
                     abs(values[1])> 1e-6):
                   ncp = ( values[0] / values[1]**2 ) * delta**2
                   values.append(ncp)
-                  if scipy_ok: # calculate power
-                     values.append(1 - float(ncx2.cdf(critical, 1.0, values[4])))
-                  else:
-                     values.append(999.0) # no scipy-->missing power value
+                  values.append(1 - float(distributions.pchisq(1, critical, values[4])))
                else:
                   values.extend([999.0,999.0]) # missing values
 
