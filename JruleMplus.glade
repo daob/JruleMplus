@@ -536,8 +536,12 @@ This field sets the criterion for "high power"; that is, when the detection prob
     <property name="has_separator">False</property>
     <property name="program_name">Jrule for Mplus</property>
     <property name="version">beta</property>
+    <property name="copyright" translatable="yes">&#xA9; 2009 Daniel Oberski</property>
     <property name="website">http://wiki.github.com/daob/JruleMplus</property>
-    <property name="authors">daniel oberski
+    <property name="authors">Daniel Oberski
+
+The name Jrule and the program of the same name for LISREL 
+output files was invented and written by William van der Veld.
 
 Based on a paper (2009) by
 
