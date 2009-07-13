@@ -215,6 +215,7 @@ class JPlot:
             self.axis.scatter( mis, powers,
                 c = [par.epc > self.app.get_field_value('delta') \
                     and self.imp_col or self.nim_col for par in parameters],
+		marker = 'o',
                 alpha = 0.8, linewidth=0, picker=10.0, vmin=self.imp_col,
 		vmax = self.nim_col
             )
