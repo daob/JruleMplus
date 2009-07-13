@@ -43,10 +43,13 @@ class JruleGTK:
        GTK+ and Glade."""
 
     def __init__(self):
-        self.filename = '' #'tests/MTMM_ROUND_1.OUT' # The file to be read
-        self.critical = False
+	# Session vars, TODO: get from ini file
+        self.filename = '' # The file to be read
+        self.last_directory = 'test/'
 
-        #Set the Glade file
+        self.critical = False # just a caching var, False triggers calculations
+
+        # Set the Glade file
         self.gladefile = "JruleMplus.glade"  
         self.tree = gtk.glade.XML(self.gladefile) 
 
@@ -54,19 +57,19 @@ class JruleGTK:
         self.window = self.tree.get_widget("main_window")
         self.aboutbox = self.tree.get_widget("about")
         self.statusbar = self.tree.get_widget("statusbar")
-        self.filechooser = self.tree.get_widget("filechooser")
         self.alpha_entry = self.tree.get_widget("alpha_entry")
         self.power_entry = self.tree.get_widget("power_entry")
         self.delta_entry = self.tree.get_widget("delta_entry")
-        self.treeview = TreeView(self)# see ItemList class below
-        self.messager = Messager(self)
+        self.filechooser = FileChooser(self) # see FileChooser class below
+        self.treeview = TreeView(self) # see ItemList class below
+        self.messager = Messager(self) 
         self.combo_parameter = ComboBox('combo_parameter', self, ['BY', 'ON', 'WITH'])
-        self.combo_group = ComboBox('combo_group', self, [])
-        self.combo_decision = ComboBox('combo_decision', self, ['Misspecified', 'Not misspecified', 
-            'Check EPC', 'Not enough information'])
+	self.combo_group = ComboBox('combo_group', self, []) # TODO: fill this
+        self.combo_decision = ComboBox('combo_decision', self, ['Misspecified', 
+	    'Not misspecified', 'Check EPC', 'Not enough information'])
         
         self.update_status() # show current file in status bar
-
+        
         self.treecolors = {'Inconclusive': '#dee3e3',
             'Misspecified': '#e38f8f',
             'Not misspecified': '#6be05f',
@@ -82,6 +85,7 @@ class JruleGTK:
                 "on_quit_mi_activate" :gtk.main_quit,
                 "on_about_mi_activate" : self.show_about,
                 "on_filechooser_file_set" : self.set_file,
+		"on_open_mi_activate" : self.set_file_from_menu,
                 "on_about_response" : self.about_response,
                 "on_delta_entry_changed" : self.reload,
                 "on_alpha_entry_changed" : self.reload,
@@ -89,7 +93,7 @@ class JruleGTK:
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
-        self.plot = None
+        self.plot = None # A hack to fool .reload()
         self.reload() # fill the tree if there is a file
         self.plot = JPlot(self)
 
@@ -98,9 +102,15 @@ class JruleGTK:
            Currently not yet in use."""
         return eval("\%1." + self.digits + "f") % float(number)
 
-    def set_file(self, filechooser):
+    def set_file_from_menu(self, menuitem):
+	'''What happens if user selects Open from menu'''
+	self.set_file(None, filename = self.filechooser.ask() )
+
+    def set_file(self, filechooser=None, filename=''):
         """Given the user's choice of file, save this data and reload the list."""
-        self.filename = filechooser.get_filename()
+	if filechooser: self.filename = filechooser.get_filename()
+	elif filename: self.filename = filename
+	else: sys.stderr.write('[108] An error occurred trying to open the file.\n')
         sys.stderr.write("File chosen is %s.\n" % self.filename)
         self.update_status()
         if not self.reload():
@@ -136,21 +146,23 @@ class JruleGTK:
         self.statusbar.push(context_id, msg)
 
     def show_about(self, about_mi):
-        sys.stderr.write("Show about box\n")
+	'Show about box'
         self.aboutbox.run() 
 
     def about_response(self, aboutbox, signal):
-        sys.stderr.write("Received signal %d from about box\n" % signal)
+	'Handle signals from about box'
         if signal < 0: aboutbox.hide()
 
 
     def get_field_value(self, which):
+	'''The judgement rules can be changed by the user via fields in the 
+	   rules tab. This function retrieves a value from a particular field.
+	   The name of this field should be passed in `which`.'''
         which_dict = {'alpha': (self.alpha_entry, valid_alpha),
             'power': (self.power_entry, valid_power),
             'delta': (self.delta_entry, valid_delta),
         }
-        if which not in which_dict.keys(): return 0.0
-  
+        if which not in which_dict.keys(): return 0.0 # unknown field
         error = ''
         value = which_dict[which][0].get_text()
         try:
@@ -168,11 +180,13 @@ class JruleGTK:
             return float(value)
 
     def get_critical(self):
-        if not self.critical:
+	"Return critical value of 1df chi square test from field or cached value"
+        if not self.critical: # not cached
 	    self.critical = distributions.qchisq(1, self.get_field_value('alpha'))
         return self.critical
 
     def error(self, err_string):
+	'Just a shorthand for:'
         self.messager.display_message(err_string)
 
 
@@ -201,7 +215,7 @@ class JPlot:
             self.axis.scatter( mis, powers,
                 c = [par.epc > self.app.get_field_value('delta') \
                     and self.imp_col or self.nim_col for par in parameters],
-                alpha = 0.8, linewidth=0, picker=5.0, vmin=self.imp_col,
+                alpha = 0.8, linewidth=0, picker=10.0, vmin=self.imp_col,
 		vmax = self.nim_col
             )
             self.axis.autoscale_view(True) #tight
@@ -219,10 +233,11 @@ class JPlot:
         self.graphview.pack_start(self.canvas, True, True)
 
     def pick_handler(self, event):
+	'''What happens if the user clicks a point in the plot'''
         mouseevent = event.mouseevent
         artist = event.artist
         sys.stderr.write('mousover %s\n'%str(artist))
-       # nw do something with this...
+        # nw do something with this...
 
     def reload(self):
         self.graphview.remove(self.canvas)
@@ -387,10 +402,45 @@ class Parameter:
 
         return decision
 
+class FileChooser:
+    '''Handles opening files, using the GTK filechooser widget and dialog'''
+    def __init__(self, app, default_dir = 'tests/'):
+	'''Set application, default directory and filters'''
+	self.app = app
+	self.default_dir = default_dir # so program can remember last session
+	self.widget =  app.tree.get_widget("filechooser")
+
+	self.filters = [] # will all be added as filters
+        filter = gtk.FileFilter()
+        filter.set_name("Output files")
+        filter.add_pattern("*.out") # the official/default Mplus output extension
+        filter.add_pattern("*.txt") # I guess some people save from Notepad..
+	self.filters.append(filter)
+
+        filter = gtk.FileFilter()
+        filter.set_name("All files")
+        filter.add_pattern("*")
+	self.filters.append(filter)
+
+    def ask(self):
+	'''Ask user for a file and return the filename chosen'''
+	dialog = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                  buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,
+				      gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+	for filter in self.filters: dialog.add_filter(filter)
+	dialog.set_current_folder(self.default_dir)
+	response = dialog.run()
+        if response == gtk.RESPONSE_OK: filename = dialog.get_filename()
+        elif response == gtk.RESPONSE_CANCEL: filename = ''
+        dialog.destroy()
+	return filename
+
+	
+	  
 
 if __name__ == "__main__":
-    try: sys.stderr = file('logfile.txt', 'w')
-    except: pass
+    #try: sys.stderr = file('logfile.txt', 'w')
+    #except: pass
     app = JruleGTK()
     gtk.main()
-    sys.stderr.close()
+    #sys.stderr.close()
