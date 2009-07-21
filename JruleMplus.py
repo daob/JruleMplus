@@ -11,8 +11,7 @@ matplotlib.interactive(1)
 from matplotlib.figure import Figure   
 from matplotlib.axes import Subplot   
 from matplotlib.lines import Line2D
-from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
-  
+from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar  
 
 try:
     import pygtk
@@ -107,9 +106,9 @@ class JruleGTK:
 
     def filter_param(self, index):
         "Filter out parameter with <index>. Assumes reset filter has been called"
-	if not index in self.already_filtered:
-            self.already_filtered.append(index)
-            self.filtered_parameters.remove(index)
+    if not index in self.already_filtered:
+        self.already_filtered.append(index)
+        self.filtered_parameters.remove(index)
 
     def jpaste(self, number):
         """Utility function to write a floating point number to text.
@@ -331,7 +330,7 @@ class TreeView:
         """Filters the parameter list by regular expression for one of the fields"""
         sys.stderr.write('Filtering.. by=%s; text=%s\n'%(by,filter_text))
         self.application.reset_filter() # reset parameter filter
-	colnum = [name.lower() for name in self.column_names].index(by.lower())
+        colnum = [name.lower() for name in self.column_names].index(by.lower())
         def visible_func(model, iter, user_data):
             if not (filter_text and model.get_value(iter, colnum)): return True
             found = filter_re.search(str(model.get_value(iter, colnum)))
@@ -341,6 +340,13 @@ class TreeView:
                 return False
 
         self.reload(visible_func)
+   
+    def get_html(self):
+        "Return the current content of the view as HTML, fit for exporting"
+        def get_html_from_row(model, path, iter, user_data):
+            "called on each row to return it as html or whatever"
+            pass
+        pass
 
 
 class ComboBox:
