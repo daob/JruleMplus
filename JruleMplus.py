@@ -205,7 +205,9 @@ class JruleGTK:
 
     def save_tree(self, obj):
         "Save the treeview as HTML file"
-        outfile = file('outfile.html', 'w')
+        filename = FileChooser(self, action=gtk.FILE_CHOOSER_ACTION_SAVE).\
+            ask(default_name=os.path.splitext(self.filename)[0]+'.doc')
+        outfile = file(filename, 'w')
         outfile.write(self.treeview.get_html())
         outfile.close()
         sys.stderr.write('saved to file ' + filename + '.\n')
@@ -364,6 +366,14 @@ class TreeView:
         html += '\n<html><head><title>JRule for Mplus output</title>\n' + \
                 '<meta http-equiv="Content-Type"'+ \
                 ' content="text/html; charset=UTF-8">\n</head>\n<body>\n'
+        html += '<h2>Decision rules</h2><table><tr>' + \
+                '<th>Minimum misspecification</th><th>Alpha</th>' + \
+                '<th>&quot;High&quot; power</th></tr><tr>' + \
+                '</td><td>'.join([str(val) for val in \
+                (self.application.get_field_value('delta'), 
+                 self.application.get_field_value('alpha'), 
+                 self.application.get_field_value('power'), )]) 
+        html += '</td></tr></table><h2>Parameters</h2>'
         html += '<table><thead>'
         html += '\n<tr><th>' + '</th><th>'.join(self.column_names) + \
                 '</th></tr></thead><tbody>'
@@ -478,17 +488,30 @@ class Parameter:
 
 class FileChooser:
     '''Handles opening files, using the GTK filechooser widget and dialog'''
-    def __init__(self, app, default_dir = 'tests/'):
+    def __init__(self, 
+                 app, 
+                 default_dir = 'tests/', 
+                 action = gtk.FILE_CHOOSER_ACTION_OPEN):
         '''Set application, default directory and filters'''
         self.app = app
+        self.action = action # set to SAVE for save dialog
         self.default_dir = default_dir # so program can remember last session
         self.widget =  app.tree.get_widget("filechooser")
 
         self.filters = [] # will all be added as filters
         filter = gtk.FileFilter()
-        filter.set_name("Output files")
-        filter.add_pattern("*.out") # the official/default Mplus output extension
-        filter.add_pattern("*.txt") # I guess some people save from Notepad..
+        if action is  gtk.FILE_CHOOSER_ACTION_OPEN:
+            filter.set_name("Output files")
+            filter.add_pattern("*.out") # the official/default Mplus output extension
+            filter.add_pattern("*.txt") # I guess some people save from Notepad..
+
+        elif action is gtk.FILE_CHOOSER_ACTION_SAVE:
+            filter.set_name("Microsoft Word files")
+            filter.add_pattern("*.doc") 
+            self.filters.append(filter)
+            filter = gtk.FileFilter()
+            filter.set_name("HTML files")
+            filter.add_pattern("*.html") 
         self.filters.append(filter)
 
         filter = gtk.FileFilter()
@@ -496,13 +519,15 @@ class FileChooser:
         filter.add_pattern("*")
         self.filters.append(filter)
 
-    def ask(self):
+    def ask(self, default_name=''):
         '''Ask user for a file and return the filename chosen'''
-        dialog = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                         buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,
-                         gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        dialog = gtk.FileChooserDialog(title=None, action=self.action,
+                         buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                          self.action is gtk.FILE_CHOOSER_ACTION_OPEN and \
+                          gtk.STOCK_OPEN or gtk.STOCK_SAVE, gtk.RESPONSE_OK))
         for filter in self.filters: dialog.add_filter(filter)
         dialog.set_current_folder(self.default_dir)
+        dialog.set_current_name(default_name)
         response = dialog.run()
         if response == gtk.RESPONSE_OK: filename = dialog.get_filename()
         elif response == gtk.RESPONSE_CANCEL: filename = ''
