@@ -106,9 +106,9 @@ class JruleGTK:
 
     def filter_param(self, index):
         "Filter out parameter with <index>. Assumes reset filter has been called"
-    if not index in self.already_filtered:
-        self.already_filtered.append(index)
-        self.filtered_parameters.remove(index)
+        if not index in self.already_filtered:
+            self.already_filtered.append(index)
+            self.filtered_parameters.remove(index)
 
     def jpaste(self, number):
         """Utility function to write a floating point number to text.

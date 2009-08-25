@@ -11,9 +11,9 @@ data_files = ['JruleMplus.glade',
 
 mpl_data = matplotlib.get_py2exe_datafiles()
 data_files.extend(mpl_data)
-data_files.append('boost_python-vc90-mt-1_39.dll',
+data_files.extend(('boost_python-vc90-mt-1_39.dll',
     'boost_python-vc90-mt-1_39.dll.manifest', 'distributions.pyd',
-    'distributions.pyd.manifest', 'msvcm90.dll', 'msvcp90.dll', 'msvcr90.dll')
+    'distributions.pyd.manifest', 'msvcm90.dll', 'msvcp90.dll', 'msvcr90.dll'))
 
 setup(
     name = 'JruleMplus',
