@@ -1,0 +1,26 @@
+import python python-extension ; 
+
+use-project boost
+  : C:/daniel/boost_1_39_0 ;
+
+# Set up the project-wide requirements that everything uses the
+# boost_python library from the project whose global ID is
+# /boost/python.
+project
+  : requirements <library>/boost/python//boost_python ;
+
+# Declare the three extension modules.  You can specify multiple
+# source files after the colon separated by spaces.
+python-extension distributions : distributions.cpp ;
+
+# A little "rule" (function) to clean up the syntax of declaring tests
+# of these extension modules.
+local rule run-test ( test-name : sources + )
+{
+    import testing ;
+    testing.make-test run-pyd : $(sources) : : $(test-name) ;
+}
+
+# Declare test targets
+#run-test distributions : distributions distributions.py ;
+
