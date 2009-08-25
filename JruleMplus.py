@@ -89,6 +89,8 @@ class JruleGTK:
                 "on_open_mi_activate" : self.set_file_from_menu,
                 "on_about_response" : self.about_response,
                 "on_delta_entry_changed" : self.reload, # on out of tab
+                "on_save" : self.save_tree,
+                "on_print" : self.print_tree,
         }
         self.tree.signal_autoconnect(dic) 
         self.window.show()
@@ -200,6 +202,19 @@ class JruleGTK:
     def error(self, err_string):
         'Just a shorthand for:'
         self.messager.display_message(err_string)
+
+    def save_tree(self, obj):
+        "Save the treeview as HTML file"
+        outfile = file('outfile.html', 'w')
+        outfile.write(self.treeview.get_html())
+        outfile.close()
+        sys.stderr.write('saved to file ' + filename + '.\n')
+
+    def print_tree(self, obj):
+        "Print the treeview as HTML file"
+        sys.stderr.write('Print\n')
+        html = self.treeview.get_html()
+        # print the html under win32
 
 
 class JPlot:
@@ -342,11 +357,32 @@ class TreeView:
         self.reload(visible_func)
    
     def get_html(self):
-        "Return the current content of the view as HTML, fit for exporting"
-        def get_html_from_row(model, path, iter, user_data):
+        """Return the current content of the view as HTML for export/print
+            So far this is just a simple hard-coded template. Maybe integrate
+            a light-weight template engine?"""
+        html = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'    
+        html += '\n<html><head><title>JRule for Mplus output</title>\n' + \
+                '<meta http-equiv="Content-Type"'+ \
+                ' content="text/html; charset=UTF-8">\n</head>\n<body>\n'
+        html += '<table><thead>'
+        html += '\n<tr><th>' + '</th><th>'.join(self.column_names) + \
+                '</th></tr></thead><tbody>'
+        data = self.get_view_as_list()
+        html += '\n'.join(['<tr><td>' + '</td><td>'.join(row) + '</td></tr>' \
+                            for row in data])
+        html += '</tbody></table>\n'
+        html += '</body></html>'
+        return html
+
+    def get_view_as_list(self):    
+        "Return the current content of the view as a list of lists"
+        def get_html_from_row(model, path, iter, data=[]):
             "called on each row to return it as html or whatever"
-            pass
-        pass
+            data.append( [ model.get_value(iter, colnum) for colnum in \
+                range(model.get_n_columns()-1)] ) # -1 excludes the color column
+        data = []
+        self.treemodelsort.foreach(get_html_from_row, data)
+        return data
 
 
 class ComboBox:
