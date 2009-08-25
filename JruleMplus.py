@@ -32,9 +32,9 @@ def jpaste(number, digits=3):
     return "%1.3f" % float(number)
 
 # Regular expressions to validate user input in delta and alpha fields
-valid_alpha = re.compile(r'^[ \t]*0*\.[0-9]+[ \t]*$')
+valid_alpha = re.compile(r'^[ \t]*0*\.?[0-9]+[ \t]*$')
 valid_power = valid_alpha
-valid_delta = re.compile(r'^[ \t]*[0-9]*\.[0-9]+[ \t]*$')
+valid_delta = re.compile(r'^[ \t]*[0-9]*\.?[0-9]+[ \t]*$')
 
 
 
