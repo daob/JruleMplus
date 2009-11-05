@@ -32,7 +32,7 @@ setup(
                       'packages':'encodings',
                       'includes': 'cairo, pango, pangocairo, atk, gobject, \
 			matplotlib.backends.backend_gtk, distributions',
-		      'excludes': [ '_tkagg'],
+		      'excludes': [ '_tkagg', 'Tkinter'],
 		      "dll_excludes": [ "MSVCR90D.dll","MSVCR90P.dll","MSVCP90D.dll"],
 		
                   }

@@ -478,7 +478,7 @@ class Parameter:
         elif not significant and high_power:
             decision = 'Not misspecified'
         elif significant and high_power:
-            if self.epc >= self.app.get_field_value('delta'):
+            if abs(self.epc) >= abs(self.app.get_field_value('delta')):
                 decision = 'Misspecified (EPC >= delta)'
             else:
                 decision = 'Not misspecified (EPC < delta)'

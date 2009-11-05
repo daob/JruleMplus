@@ -1,6 +1,6 @@
 [Setup]
 AppName=JRule for Mplus
-AppVerName=Jrule for Mplus beta 1
+AppVerName=Jrule for Mplus 0.91
 AppPublisher=Daniel Oberski
 AppPublisherURL=http://www.daob.org/
 DefaultDirName={pf}\JruleMplus
@@ -10,7 +10,7 @@ OutputBaseFilename=JRuleMplusSetup
 Compression=lzma
 SolidCompression=true
 AllowUNCPath=false
-VersionInfoVersion=0.9
+VersionInfoVersion=0.91
 VersionInfoCompany=daniel oberski daob
 VersionInfoDescription=JRuleMplus
 LicenseFile = license.txt
