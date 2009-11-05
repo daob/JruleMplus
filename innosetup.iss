@@ -1,6 +1,6 @@
 [Setup]
 AppName=JRule for Mplus
-AppVerName=Jrule for Mplus 0.91
+AppVerName=Jrule for Mplus 0.91 (beta)
 AppPublisher=Daniel Oberski
 AppPublisherURL=http://www.daob.org/
 DefaultDirName={pf}\JruleMplus

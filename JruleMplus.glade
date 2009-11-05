@@ -532,7 +532,7 @@ This field sets the criterion for "high power"; that is, when the detection prob
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
     <property name="program_name">Jrule for Mplus</property>
-    <property name="version">beta</property>
+    <property name="version">version 0.91 (beta)</property>
     <property name="copyright" translatable="yes">&#xA9; 2009 Daniel Oberski</property>
     <property name="website">http://wiki.github.com/daob/JruleMplus</property>
     <property name="authors">Daniel Oberski
@@ -544,7 +544,17 @@ Based on a paper (2009) by
 
     Willem E. Saris
     Albert Satorra
-    William van der Veld</property>
+    William van der Veld
+
+
+Thanks are due to the following people for testing 
+the program and providing valuable feedback:
+
+   * Eldad Davidov
+   * Bart Meuleman
+
+   * &lt;Your name here? Contact me!
+	 daniel.oberski@gmail.com&gt;</property>
     <property name="documenters">daniel oberski</property>
     <property name="logo">img/decision.png</property>
     <signal name="response" handler="on_about_response"/>

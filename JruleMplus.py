@@ -137,9 +137,14 @@ class JruleGTK:
         """Reload the list using the MplusOutput class. Might be used as a callback
            so has variable number of arguments."""
         self.critical = False #recalc
+        if not self.filename: return False
         try:
-            self.output = MplusOutput(self.filename)
-            self.estimates = self.output.get_estimates()
+            if os.path.exists(self.filename):
+                self.output = MplusOutput(self.filename)
+                self.estimates = self.output.get_estimates()
+            else:
+                sys.stderr.write('Mplus output file not found: %s\n'%self.filename)
+                return False
         except Exception, e:
             sys.stderr.write('Could not reload application: %s\n'%str(e))
             self.filename = ''# Undo filename setting
@@ -409,7 +414,8 @@ class ComboBox:
         cell = gtk.CellRendererText()
         self.widget.pack_start(cell)
         self.widget.add_attribute(cell, 'text' ,0)
-        self.widget.set_active(0)   
+        self.widget.set_active(0) 
+        # FIXME: GtkWarning: gtk_entry_set_text: assertion `text != NULL' failed
 
         self.widget.connect('changed', self.changed)
 
